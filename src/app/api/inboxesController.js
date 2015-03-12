@@ -70,7 +70,12 @@
               res.location(hypermedia._links.self.href);
               res.set('Content-Type', 'application/hal+json');
               res.status(201);
-              res.send(hypermedia);
+
+              // Delay to allow EventStore to project the state properly
+              setTimeout(function() {
+                res.send(hypermedia);
+              }, config.controllerResponseDelay);
+             
             }
           });
         }
@@ -103,8 +108,18 @@
 
           if (!error && response.statusCode == 200) {
 
-            var inbox = JSON.parse(response.body);
-            var digestId = inbox.digestId;
+            var inbox, digestId;
+
+            try {
+              inbox = JSON.parse(response.body);
+              digestId = inbox.digestId;
+            } catch (ex) {
+              console.log("THE EXCEPTION:");
+              console.log(ex);
+              console.log("THE RESPONSE BODY:");
+              console.log(response.body);
+              throw ex;
+            }
 
             //TODO: all this logic, yikes!
             if (!req.headers.hasOwnProperty('x-github-event')) {
