@@ -86,14 +86,13 @@
             var links = obj.links;
             var guid = uuid();
             result = gitHubEventsToApiResponse(obj.entries);
+            result._links = {};
             //TODO: check all of them, not just the third one
             if (links[3].relation === 'next') {
               cache.set(guid, links[3].uri);
               var next = buildUri(protocol, host, req.instance.instanceId, guid, req.query);
               var previous = buildUri(protocol, host, req.instance.instanceId, req.query.page, req.query);
-              result._links = {
-                next: next
-              };
+              result._links['next'] = next;
             }
           }
 
