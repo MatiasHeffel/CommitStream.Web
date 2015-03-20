@@ -74,7 +74,8 @@
         es.streams.get({
           name: stream,
           count: pageSize,
-          pageUrl: page
+          pageUrl: page,
+          embed: 'tryharder'
         }, function(error, response) {
           var result = {
             commits: [],

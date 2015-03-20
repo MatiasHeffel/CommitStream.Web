@@ -9,7 +9,7 @@
     "body-parser": "^1.6.3",
     "chai": "^1.10.0",
     "cors": "^2.4.1",
-    "eventstore-client": "openAgile/eventstore-client",
+    "eventstore-client": "jogoshugh/eventstore-client",
     "express": "^4.8.3",
     "express-handlebars": "^1.1.0",
     "istanbul": "^0.3.2",
