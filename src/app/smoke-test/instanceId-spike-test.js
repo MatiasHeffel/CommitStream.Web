@@ -11,12 +11,12 @@ chai.config.includeStack = true;
 var apiKeyForAddingInstance = '?apiKey=32527e4a-e5ac-46f5-9bad-2c9b7d607bd7';
 
 function href(path) {
-  return 'http://localhost:6565/api' + path;
+  return 'https://v1cs-clusty.azurewebsites.net/api' + path;
 }
 
 var instances = [
   {
-    instanceId: '2ef2b90b-52ae-4a2a-a606-09cb0c4d33c5',
+    instanceId: '71f60342-e7d8-4012-bf71-7cab3461c9fb',
     apiKey: undefined,
     digestCreateUri: undefined,
     digest: {
@@ -56,7 +56,7 @@ var instances = [
   },
   // second instance:
   {
-    instanceId: '453fcccd-3717-411d-8f87-3421b9effd79',
+    instanceId: 'd3624748-7daf-4aef-ac86-3f009ff2eed3',
     apiKey: undefined,
     digestCreateUri: undefined,
     digest: {
@@ -179,21 +179,25 @@ describe('/api/instances (and more)', function() {
       return rp(get('/' + instance.instanceId + '/query?workitem=S-11111&apiKey=' + instance.apiKey));
     })
     .then(function(queryResponse) {
-      var firstMessage = queryResponse.commits[0].message;
-      firstMessage.should.equal(instance.inboxCommits.commits[0].message); 
-      console.log("JUST ONE COMMIT:");
-      console.log(firstMessage);
-      console.log("\n");
+      setTimeout(function() {
+        var firstMessage = queryResponse.commits[0].message;
+        firstMessage.should.equal(instance.inboxCommits.commits[0].message); 
+        console.log("JUST ONE COMMIT:");
+        console.log(firstMessage);
+        console.log("\n");
+        done();
+      }, 3000)
     })
     .catch(console.error)
-    .finally(done);
   }    
 
-  it('Has isolated data for instance1.', function(done) {    
+  it('Has isolated data for instance1.', function(done) {
+    this.timeout(20000);
     instanceTest(instances[0], done);
   });
 
   it('Has isolated data for instance2.', function(done) {    
+    this.timeout(20000);
     instanceTest(instances[1], done);
   });
 

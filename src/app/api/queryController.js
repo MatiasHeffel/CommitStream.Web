@@ -82,6 +82,8 @@
           };
 
           if (response.body) {
+            console.log("RESPONSE BODY FROM ES:");
+            console.log(response.body);
             var obj = JSON.parse(response.body);
             var links = obj.links;
             var guid = uuid();
