@@ -1,7 +1,14 @@
 (function() {
   'use strict';
+  
+  console.log('trying to load up')
+  // console.log(window.CommitStreamAdminBoot)
+  // if (window.CommitStreamAdminBoot) return;
 
   function CommitStreamAdminBoot(el) {
+   
+    // debugger;
+   
     var persistentOptions = {
       headers: {
         Bearer: ''
@@ -115,6 +122,7 @@
     app.controller('InstancesController', ['$rootScope', '$scope', '$http', '$location', 'CommitStreamApi', 'serviceUrl', 'configGetUrl', 'configSaveUrl',
       function($rootScope, $scope, $http, $location, CommitStreamApi, serviceUrl, configGetUrl, configSaveUrl) {
         var config;
+        console.log('InstancesController')
 
         $scope.loaderUrl = serviceUrl + '/ajax-loader.gif';
 
@@ -204,6 +212,8 @@
       'configSaveUrl', '$http', '$q', 'prompt', '$location',
       function($rootScope, $scope, $timeout, serviceUrl,
         configSaveUrl, $http, $q, prompt, $location) {
+
+        console.log('InboxesController')
 
         $scope.inboxesVisible = function() {
           // Only display when we actually have the config in $scope!
@@ -450,5 +460,8 @@
 
     angular.bootstrap(el, ['commitStreamAdmin']);
   };
+  
+  xdomain.debug=true;
+  
   window.CommitStreamAdminBoot = CommitStreamAdminBoot;
 }());

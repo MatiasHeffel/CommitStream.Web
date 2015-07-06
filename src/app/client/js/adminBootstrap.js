@@ -2,6 +2,12 @@
   try {
     'use strict';
 
+    // console.log(window.CommitStreamAdminBoot)
+    // if (window.CommitStreamAdminBoot) {
+    //   window.CommitStreamAdminBoot($('#commitStreamAdmin'))
+    //   return;
+    // } 
+
     var prependStyleSheet = function(el, href) {
       el.prepend($('<link type="text/css" rel="stylesheet" href="' + href + '">'));
     }
@@ -20,7 +26,7 @@
     prependStyleSheet(commitStreamRoot, serviceUrl + '/css/bootstrap.min.css');
 
     // XDomain support for IE9 especially
-    commitStreamRoot.prepend($('<scr' + 'ipt src="' + serviceUrl + '/bower_components/xdomain/dist/xdomain.min.js" slave="' + serviceUrl + '/proxy.html"></scr' + 'ipt>"'));
+    commitStreamRoot.prepend($('<scr' + 'ipt src="' + serviceUrl + '/bower_components/xdomain/dist/xdomain.js" slave="' + serviceUrl + '/proxy.html"></scr' + 'ipt>"'));
 
     // Grab route locations for config-get and config-save, if they exist
 
@@ -33,6 +39,29 @@
         return;
       }
       var currentScript = scripts.shift();
+
+      function hasAngular() {
+        return window.angular !== undefined;
+      }
+
+      function isTheAngularScript(scriptToLoad) {
+        return scriptToLoad.indexOf('angular.js') > 0;
+      }
+
+      function removeScriptFromLoadSequence(script) {
+        currentScript = scripts.shift();
+      }
+
+      function hasCommitStreamAdminBoot() {
+        return window.CommitStreamAdminBoot !== undefined;
+      }
+
+      if(hasAngular() && isTheAngularScript(currentScript)) {
+        removeScriptFromLoadSequence(currentScript);
+      }
+
+      console.log(currentScript)
+      
       $.getScript(currentScript)
         .done(function() {
           if (scripts.length > 0) {
@@ -56,6 +85,7 @@
               }
             });
 
+            console.log(rootElementId)
             CommitStreamAdminBoot($('#' + rootElementId));
           }
         })
@@ -67,7 +97,7 @@
     };
 
     var scripts = [
-      serviceUrl + '/bower_components/angular/angular.min.js',
+      serviceUrl + '/bower_components/angular/angular.js',
       serviceUrl + '/bower_components/angular-route/angular-route.min.js',
       serviceUrl + '/bower_components/angular-bootstrap/ui-bootstrap.min.js',
       serviceUrl + '/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js',
