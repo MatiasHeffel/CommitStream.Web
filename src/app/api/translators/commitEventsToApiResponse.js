@@ -52,6 +52,7 @@
 
   module.exports = function(entries) {
     var commits = _.map(entries, function(entry) {
+      console.log('entry' + entry)
       var e = JSON.parse(entry.data);
       var family = getFamily(entry.eventType);
       var repoInfo = getRepoInfo(family, e.html_url);
