@@ -128,15 +128,20 @@
     return (!model || !model.commits);
   }
 
-  function getUrlToQuery(commitStreamDomId, digestId, workitem, instanceId, apiKey) {
+  function isShowChildren() {
+    return true;
+  }
+
+  function getUrlToQuery(commitStreamDomId, digestId, workitem, instanceId, apiKey, children) {
     if ($(commitStreamDomId).find('.side-panel-scrollable').attr('next')) {
       return $(commitStreamDomId).find('.side-panel-scrollable').attr('next');
     } else if (workitem || digestId) {
-      var url = '{{{apiUrl}}}' + instanceId;      
+      var url = '{{{apiUrl}}}' + instanceId;
       if (digestId !== null && digestId !== undefined) {
         url += '/digests/' + digestId + '/commits';
-      } else {        
+      } else {
         url += '/commits/tags/versionone/workitems/' + workitem;
+        url += isShowChildren() ? ',' + children : '';
       }
 
       url += '?apiKey=' + apiKey;
@@ -206,7 +211,7 @@
   // Put a commitStream object in the global space
   if (!window.CommitStream) {
     window.CommitStream = {
-      commitsDisplay: function(commitStreamDomId, workitem, errorHandler, digestId, instanceId, apiKey) {
+      commitsDisplay: function(commitStreamDomId, workitem, errorHandler, digestId, instanceId, apiKey, children) {
 
         function setCheckboxVisibility(model, digestId) {
           if (digestId) {
@@ -225,7 +230,7 @@
             }
           }
 
-          var url = getUrlToQuery(commitStreamDomId, digestId, workitem, instanceId, apiKey);
+          var url = getUrlToQuery(commitStreamDomId, digestId, workitem, instanceId, apiKey, children);
 
           queryCommitStreamRefresh = function() {
             queryCommitStream(commitStreamDomId, url, queryCallBack, errorHandler);
