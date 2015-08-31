@@ -12,7 +12,11 @@ var express = require('express'),
   appConfigure = require('./middleware/appConfigure'),
   Promise = require('bluebird'),
   domainMiddleware = require('express-domain-middleware'),
-  methodOverride = require('method-override');
+  methodOverride = require('method-override'),
+  mongoose = require('mongoose');
+
+
+mongoose.connect('mongodb://localhost/test');
 
 // DO NOT MOVE THIS. It is here to wrap routes in a domain to catch unhandled errors
 app.use(domainMiddleware);
@@ -23,11 +27,11 @@ Promise.onPossiblyUnhandledRejection(function(err) {
 });
 
 validation.validateConfig();
-validation.validateEventStore(function(error) {
-  if (error) {
-    throw new Error(error);
-  }
-});
+// validation.validateEventStore(function(error) {
+//   if (error) {
+//     throw new Error(error);
+//   }
+// });
 
 // override with the X-HTTP-Method-Override header in the request
 app.use(methodOverride('X-HTTP-Method-Override'))
@@ -39,7 +43,7 @@ app.get('/version', function(req, res) {
 });
 
 var api = require("./api");
-require('./bootstrapper').boot(config);
+// require('./bootstrapper').boot(config);
 
 // Wire up express-handlebars as the view engine for express.
 app.engine('handlebars', exphbs());
@@ -108,7 +112,7 @@ app.use(csError.errorHandler);
 
 function getHostSettings(req) {
   return {
-    protocol : config.protocol || req.protocol,
+    protocol: config.protocol || req.protocol,
     host: req.get('host'),
     key: req.query.key
   };

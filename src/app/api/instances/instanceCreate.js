@@ -1,24 +1,25 @@
 (function() {
-  var instanceAdded = require('./instanceAdded'),
-      instanceFormatAsHal = require('./instanceFormatAsHal'),
-      eventStore = require('../helpers/eventStoreClient'),
-      setTimeout = require('../helpers/setTimeout'),
-      config = require('../../config');
+  var instanceFormatAsHal = require('./instanceFormatAsHal'),
+    setTimeout = require('../helpers/setTimeout'),
+    config = require('../../config'),
+    mongoose = require('mongoose'),
+    model = require('../../models/instance'),
+    Instance = mongoose.model('Instance'),
+    uuid = require('uuid-v4');
 
   module.exports = function(req, res, next) {
-    var instanceAddedEvent = instanceAdded.create();
+    var instance = new Instance();
+    instance.instanceId = uuid();
+    instance.apiKey = uuid();
 
-    var args = {
-      name: 'instances',
-      events: instanceAddedEvent
-    };
+    instance.save(function(err, instance) {
+      if (err) return res.send(500, err);
 
-    eventStore.postToStream(args)
-      .then(function() {
-        var hypermedia = instanceFormatAsHal(req.href, instanceAddedEvent.data);
-        setTimeout(function() {
-          res.hal(hypermedia, 201);
-        }, config.controllerResponseDelay);
-      });
+      var hypermedia = instanceFormatAsHal(req.href, instance);
+      setTimeout(function() {
+        res.hal(hypermedia, 201);
+      }, config.controllerResponseDelay);
+    });
+
   };
 }())
