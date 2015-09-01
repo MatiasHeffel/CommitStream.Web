@@ -1,6 +1,7 @@
 (function() {
   var csError = require('./csError'),
-    eventStore = require('../api/helpers/eventStoreClient');
+    mongoose = require('mongoose'),
+    Instance = require('../models/instance');
 
   var InvalidInstanceApiKey = csError.createCustomError('InvalidInstanceApiKey', function(instanceId) {
     var message = 'Invalid apiKey for instance ' + instanceId;
@@ -9,13 +10,13 @@
   });
 
   module.exports = function(req, res, next, instanceId) {
-    eventStore.queryStatePartitionById({
-      name: 'instance',
-      id: instanceId
-    }).then(function(instance) {      
-      if (instance.apiKey === req.query.apiKey
-          ||
-          instance.apiKey === req.get('Bearer')) {
+    Instance.findOne({
+      instanceId: instanceId
+    }, function(err, instance) {
+      if (!instance) throw new InvalidInstanceApiKey(instanceId);
+
+      if (instance.apiKey === req.query.apiKey ||
+        instance.apiKey === req.get('Bearer')) {
         req.instance = instance;
         next();
       } else {

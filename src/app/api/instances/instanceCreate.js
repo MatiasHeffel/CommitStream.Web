@@ -2,10 +2,9 @@
   var instanceFormatAsHal = require('./instanceFormatAsHal'),
     setTimeout = require('../helpers/setTimeout'),
     config = require('../../config'),
+    uuid = require('uuid-v4'),
     mongoose = require('mongoose'),
-    model = require('../../models/instance'),
-    Instance = mongoose.model('Instance'),
-    uuid = require('uuid-v4');
+    Instance = require('../../models/instance');
 
   module.exports = function(req, res, next) {
     var instance = new Instance();
@@ -22,4 +21,4 @@
     });
 
   };
-}())
+}());
