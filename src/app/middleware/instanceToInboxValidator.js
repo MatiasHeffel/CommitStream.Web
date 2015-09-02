@@ -1,6 +1,7 @@
 (function() {
   var csError = require('./csError'),
-    eventStore = require('../api/helpers/eventStoreClient');
+    mongoose = require('mongoose'),
+    Inbox = require('../models/inbox');
 
   var InvalidInstanceToInbox = csError.createCustomError('InvalidInstanceToInbox', function(instanceId, inboxId) {
     var message = 'The inbox ' + inboxId + ' does not exist for instance ' + instanceId;
@@ -15,21 +16,19 @@
   });
 
   module.exports = function(req, res, next, inboxId) {
-    eventStore.queryStatePartitionById({
-      name: 'inbox',
-      id: inboxId
-    }).then(function(inbox) {
-      if (inbox.eventType === 'InboxRemoved') {
-        throw new InstanceToInboxRemoved(req.instance.instanceId, inboxId);
-      }
-      if (inbox.eventType === 'InboxAdded' && req.instance.instanceId === inbox.data.instanceId) {
-        req.inbox = inbox.data;
+    Instance.findOne({
+      inboxId: inboxId
+    }, function(err, i) {
+      // TODO: do we still want this?
+      // if (inbox.eventType === 'InboxRemoved') {
+      //   throw new InstanceToInboxRemoved(req.instance.instanceId, inboxId);
+      // }
+      if (req.instance.instanceId === i.instanceId) {
+        req.inbox = i;
         next();
       } else {
         throw new InvalidInstanceToInbox(req.instance.instanceId, inboxId);
       }
     });
-
   };
-
 }());
