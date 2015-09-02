@@ -15,6 +15,7 @@ var express = require('express'),
   methodOverride = require('method-override'),
   mongoose = require('mongoose');
 
+//TODO: READ FROM THE CONFIG
 mongoose.connect('mongodb://localhost/test');
 
 // DO NOT MOVE THIS. It is here to wrap routes in a domain to catch unhandled errors

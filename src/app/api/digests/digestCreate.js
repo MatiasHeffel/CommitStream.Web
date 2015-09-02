@@ -1,29 +1,29 @@
 (function() {
   var digestAdded = require('./digestAdded'),
     digestFormatAsHal = require('./digestFormatAsHal'),
-    eventStore = require('../helpers/eventStoreClient'),
     sanitizeAndValidate = require('../sanitizeAndValidate'),
     setTimeout = require('../helpers/setTimeout'),
-    config = require('../../config');
+    config = require('../../config'),
+    mongoose = require('mongoose'),
+    uuid = require('uuid-v4'),
+    Digest = require('../../models/digest');
 
   module.exports = function(req, res, next) {
+    //TODO: use mongoose validation
+    //sanitizeAndValidate('digest', req.body, ['description'], digestAdded);
 
-    sanitizeAndValidate('digest', req.body, ['description'], digestAdded);
+    var digest = new Digest();
+    digest.instanceId = req.instance.instanceId;
+    digest.digestId = uuid();
+    digest.description = req.body.description;
 
-    var instanceId = req.instance.instanceId;
-    var digestAddedEvent = digestAdded.create(instanceId, req.body.description);
+    digest.save(function(err, d) {
+      if (err) return res.send(500, err);
 
-    var args = {
-      name: 'digests-' + instanceId,
-      events: digestAddedEvent
-    };
-
-    eventStore.postToStream(args)
-      .then(function() {
-        var hypermedia = digestFormatAsHal(req.href, instanceId, digestAddedEvent.data);
-        setTimeout(function() {
-          res.hal(hypermedia, 201);
-        }, config.controllerResponseDelay);
-      });
+      var hypermedia = digestFormatAsHal(req.href, d.instanceId, d);
+      setTimeout(function() {
+        res.hal(hypermedia, 201);
+      }, config.controllerResponseDelay);
+    });
   };
 }());
