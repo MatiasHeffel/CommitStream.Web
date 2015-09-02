@@ -3,11 +3,26 @@
     Schema = mongoose.Schema;
 
   var inboxSchema = new mongoose.Schema({
-    instanceId: String,
-    digestId: String,
-    inboxId: String,
-    name: String,
-    family: String,
+    instanceId: {
+      type: String,
+      required: true
+    },
+    digestId: {
+      type: String,
+      required: true
+    },
+    inboxId: {
+      type: String,
+      required: true
+    },
+    name: {
+      type: String,
+      required: true
+    },
+    family: {
+      type: String,
+      required: true
+    },
     url: String
   });
 

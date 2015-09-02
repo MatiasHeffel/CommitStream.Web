@@ -3,8 +3,14 @@
     Schema = mongoose.Schema;
 
   var instanceSchema = new mongoose.Schema({
-    instanceId: String,
-    apiKey: String
+    instanceId: {
+      type: String,
+      required: true
+    },
+    apiKey: {
+      type: String,
+      required: true
+    }
   });
 
   module.exports = mongoose.model('Instance', instanceSchema);
