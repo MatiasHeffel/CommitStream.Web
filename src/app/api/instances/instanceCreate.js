@@ -12,6 +12,8 @@
     instance.apiKey = uuid();
 
     instance.save(function(err, instance) {
+      // TODO: find a general way of handling errors like we used to have with
+      // the event store helper
       if (err) return res.send(500, err);
 
       var hypermedia = instanceFormatAsHal(req.href, instance);

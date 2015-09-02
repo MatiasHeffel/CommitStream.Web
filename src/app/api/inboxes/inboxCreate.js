@@ -1,31 +1,35 @@
 (function() {
   var inboxAdded = require('./inboxAdded'),
-    eventStore = require('../helpers/eventStoreClient'),
     inboxFormatAsHal = require('./inboxFormatAsHal'),
-    sanitizeAndValidate = require('../sanitizeAndValidate'),
+    //sanitizeAndValidate = require('../sanitizeAndValidate'),
     setTimeout = require('../helpers/setTimeout'),
-    config = require('../../config');
+    config = require('../../config'),
+    mongoose = require('mongoose'),
+    uuid = require('uuid-v4'),
+    Inbox = require('../../models/inbox');
 
   module.exports = function(req, res) {
-    var digestId = req.params.digestId;
-    var instanceId = req.instance.instanceId;
+    // TODO: validate with mongoose schema
+    //sanitizeAndValidate('inbox', req.body, ['family', 'name', 'url'], inboxAdded);
+    var inbox = new Inbox();
+    inbox.instanceId = req.instance.instanceId;
+    inbox.digestId = req.digest.digestId;
+    inbox.inboxId = uuid();
+    inbox.name = req.body.name;
+    inbox.family = req.body.family;
+    inbox.url = req.body.url;
 
-    req.body.digestId = digestId;
+    //req.body.digestId = digestId;
+    // TODO: find a general way of handling errors like we used to have with
+    // the event store helper
+    inbox.save(function(err, i) {
+      if (err) return res.send(500, err);
 
-    sanitizeAndValidate('inbox', req.body, ['family', 'name', 'url'], inboxAdded);
-
-    var inboxAddedEvent;
-
-    inboxAddedEvent = inboxAdded.create(instanceId, digestId, req.body.family, req.body.name, req.body.url);
-    var args = {
-      name: 'inboxes-' + instanceId,
-      events: inboxAddedEvent
-    };
-    eventStore.postToStream(args).then(function() {
-      var hypermedia = inboxFormatAsHal(req.href, instanceId, inboxAddedEvent.data);
+      var hypermedia = inboxFormatAsHal(req.href, i.instanceId, i);
       setTimeout(function() {
         res.hal(hypermedia, 201);
       }, config.controllerResponseDelay);
+
     });
   };
 }());
