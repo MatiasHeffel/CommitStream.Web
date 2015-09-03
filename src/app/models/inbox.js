@@ -19,6 +19,7 @@
       type: String,
       required: true
     },
+    //TODO: validate enum
     family: {
       type: String,
       required: true

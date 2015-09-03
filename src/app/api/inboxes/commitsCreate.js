@@ -1,9 +1,10 @@
 (function() {
   var validateUUID = require('../validateUUID'),
-    eventStore = require('../helpers/eventStoreClient'),
     translatorFactory = require('../translators/translatorFactory'),
     commitsAddedFormatAsHal = require('./commitsAddedFormatAsHal'),
-    MalformedPushEventError = require('../../middleware/malformedPushEventError');
+    MalformedPushEventError = require('../../middleware/malformedPushEventError'),
+    mongoose = require('mongoose'),
+    Commit = require('../../models/commit');
 
   module.exports = function(req, res) {
     var instanceId = req.instance.instanceId,
@@ -14,26 +15,24 @@
 
     var translator = translatorFactory.create(req);
 
-    if (translator) {
-      var events = translator.translatePush(req.body, instanceId, digestId, inboxId);
-
-      var postArgs = {
-        name: 'inboxCommits-' + inboxId,
-        events: events
-      };
-
-      eventStore.postToStream(postArgs)
-        .then(function() {
-          var inboxData = {
-            inboxId: inboxId,
-            digestId: digestId
-          };
-
-          var hypermedia = commitsAddedFormatAsHal(req.href, instanceId, inboxData);
-          res.hal(hypermedia, 201);
-        });
-    } else {
+    if (!translator) {
       throw new MalformedPushEventError();
     }
+
+    var events = translator.translatePush(req.body, instanceId, digestId, inboxId);
+    //TODO: what to do if just one fails the validation? stop there or continue
+    // with the next?
+    Commit.collection.insert(events, function(err, commits) {
+      if (err) return res.send(500, err);
+
+      var inboxData = {
+        inboxId: inboxId,
+        digestId: digestId
+      };
+
+      var hypermedia = commitsAddedFormatAsHal(req.href, instanceId, inboxData);
+      res.hal(hypermedia, 201);
+
+    });
   };
 }());

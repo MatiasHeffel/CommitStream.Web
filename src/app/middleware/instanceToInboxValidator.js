@@ -16,7 +16,7 @@
   });
 
   module.exports = function(req, res, next, inboxId) {
-    Instance.findOne({
+    Inbox.findOne({
       inboxId: inboxId
     }, function(err, i) {
       // TODO: do we still want this?
