@@ -1,5 +1,5 @@
 (function() {
-  var instanceFormatAsHal = require('./instanceFormatAsHal'),    
+  var instanceFormatAsHal = require('./instanceFormatAsHal'),
     config = require('../../config'),
     uuid = require('uuid-v4'),
     mongoose = require('mongoose'),
@@ -13,7 +13,7 @@
     instance.save(function(err, instance) {
       // TODO: find a general way of handling errors like we used to have with
       // the event store helper
-      if (err) return res.send(500, err);
+      if (err) return res.status(500).send(err);
       var hypermedia = instanceFormatAsHal(req.href, instance);
       res.hal(hypermedia, 201);
     });

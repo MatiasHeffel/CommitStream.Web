@@ -4,7 +4,8 @@
     util = require('util'),
     uuid = require('uuid-v4'),
     createCustomError = require('custom-error-generator'),
-    csError = require('../../middleware/csError');
+    csError = require('../../middleware/csError'),
+    v1Mentions = require('./v1Mentions');
 
   //TODO: do we want this kind of library to know about status codes?
   githubTranslator.GitHubCommitMalformedError = createCustomError('GitHubCommitMalformedError', null, function(error, pushEvent) {
@@ -23,6 +24,7 @@
       };
 
       var events = _.map(pushEvent.commits, function(aCommit) {
+
         var commit = {
           instanceId: instanceId,
           digestId: digestId,
@@ -41,8 +43,10 @@
           html_url: aCommit.url,
           repository: repository,
           branch: branch,
+          mentions: v1Mentions.getWorkitems(aCommit.message),
           originalMessage: aCommit
         };
+        
         return commit;
       });
 

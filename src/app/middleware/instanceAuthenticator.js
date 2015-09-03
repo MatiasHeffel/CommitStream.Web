@@ -12,7 +12,8 @@
   module.exports = function(req, res, next, instanceId) {
     Instance.findOne({
       instanceId: instanceId
-    }, function(err, instance) {
+    }, function(err, instance) {      
+      if (err) return res.status(500).send(err);
       if (!instance) throw new InvalidInstanceApiKey(instanceId);
 
       if (instance.apiKey === req.query.apiKey ||

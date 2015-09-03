@@ -13,8 +13,9 @@
     Digest.findOne({
       digestId: digestId
     }, function(err, digest) {
+      if (err) return res.status(500).send(err);
       if (!digest) throw new InvalidInstanceToDigest(req.instance.instanceId, digestId);
-      
+
       if (req.instance.instanceId === digest.instanceId) {
         req.digest = digest;
         next();

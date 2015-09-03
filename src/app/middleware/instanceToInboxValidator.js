@@ -19,6 +19,8 @@
     Inbox.findOne({
       inboxId: inboxId
     }, function(err, i) {
+      if (err) return res.status(500).send(err);
+      if (!i) throw new InvalidInstanceToDigest(req.instance.instanceId, digestId);
       // TODO: do we still want this?
       // if (inbox.eventType === 'InboxRemoved') {
       //   throw new InstanceToInboxRemoved(req.instance.instanceId, inboxId);

@@ -15,6 +15,7 @@
       type: String,
       required: true
     },
+    mentions: [],
     sha: {
       type: String,
       required: true
