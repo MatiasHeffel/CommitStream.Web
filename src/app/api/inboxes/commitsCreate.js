@@ -23,6 +23,7 @@
     //TODO: what to do if just one fails the validation? stop there or continue
     // with the next?
     //TODO: validation does not seem to work for bulk insertion
+    //TODO: check if events lenght == 0
     Commit.collection.insert(events, function(err, commits) {
       if (err) return res.send(500, err);
 

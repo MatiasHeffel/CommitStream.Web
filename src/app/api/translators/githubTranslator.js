@@ -1,5 +1,4 @@
-﻿
-(function(githubTranslator) {
+﻿(function(githubTranslator) {
   var _ = require('underscore'),
     util = require('util'),
     uuid = require('uuid-v4'),
@@ -14,6 +13,31 @@
     this.errors = [error.toString()];
     this.pushEvent = pushEvent;
   });
+
+  var getRepoInfo = function(commitUrl) {
+    var repoArray;
+    repoArray = commitUrl.split('/commit')[0].split('/');
+    var r = {};
+    r.repoName = repoArray.pop();
+    r.repoOwner = repoArray.pop();
+    r.serverUrl = repoArray.pop();
+
+    if (repoArray.pop() === '') {
+      r.serverUrl = repoArray.pop() + '//' + r.serverUrl;
+    }
+
+    return r;
+  };
+
+  var getBranchHref = function(repoHref, branch) {
+    // http://serverUrl/repoOwner/reponame/tree/branchName
+    return repoHref + '/tree/' + branch;
+  }
+
+  var getRepoHref = function(repoInfo) {
+    // https://serverUrl/repoOwner/repoName
+    return repoInfo.serverUrl + '/' + repoInfo.repoOwner + '/' + repoInfo.repoName;
+  }
 
   githubTranslator.translatePush = function(pushEvent, instanceId, digestId, inboxId) {
     try {
@@ -44,9 +68,15 @@
           repository: repository,
           branch: branch,
           mentions: v1Mentions.getWorkitems(aCommit.message),
+          family: 'GitHub',
           originalMessage: aCommit
         };
-        
+
+        var repoInfo = getRepoInfo(commit.html_url);
+        commit.repoHref = getRepoHref(repoInfo);
+        commit.repo = repoInfo.repoOwner + '/' + repoInfo.repoName;
+        commit.branchHref = getBranchHref(commit.repoHref, branch);
+
         return commit;
       });
 
