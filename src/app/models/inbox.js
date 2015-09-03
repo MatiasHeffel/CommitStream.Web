@@ -18,11 +18,11 @@
     name: {
       type: String,
       required: true
-    },
-    //TODO: validate enum
+    },    
     family: {
       type: String,
-      required: true
+      required: true,
+      enum: ['GitHub', 'GitLab', 'Bitbucket']
     },
     url: String
   });
