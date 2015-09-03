@@ -3,7 +3,8 @@
 (function (gitLabTranslator) {
   var _ = require('underscore'),
       uuid = require('uuid-v4'),
-      GitLabCommitMalformedError = require('../../middleware/gitLabCommitMalformedError');
+      GitLabCommitMalformedError = require('../../middleware/gitLabCommitMalformedError'),
+      v1Mentions = require('./v1Mentions');
 
   var hasCorrectHeaders = function hasCorrectHeaders(headers) {
     return headers.hasOwnProperty('x-gitlab-event') && headers['x-gitlab-event'] === 'Push Hook';
@@ -16,6 +17,31 @@
       return true;
     }
     return false;
+  };
+
+  var getRepoInfo = function getRepoInfo(commitUrl) {
+    var repoArray = undefined;
+    repoArray = commitUrl.split('/commit')[0].split('/');
+    var r = {};
+    r.repoName = repoArray.pop();
+    r.repoOwner = repoArray.pop();
+    r.serverUrl = repoArray.pop();
+
+    if (repoArray.pop() === '') {
+      r.serverUrl = repoArray.pop() + '//' + r.serverUrl;
+    }
+
+    return r;
+  };
+
+  // http://serverUrl/repoOwner/reponame/tree/branchName
+  var getBranchHref = function getBranchHref(repoHref, branch) {
+    return repoHref + '/tree/' + branch;
+  };
+
+  // https://serverUrl/repoOwner/repoName
+  var getRepoHref = function getRepoHref(repoInfo) {
+    return repoInfo.serverUrl + '/' + repoInfo.repoOwner + '/' + repoInfo.repoName;
   };
 
   gitLabTranslator.translatePush = function (pushEvent, instanceId, digestId, inboxId) {
@@ -53,8 +79,14 @@
             html_url: aCommit.url,
             repository: repository,
             branch: branch,
+            mentions: v1Mentions.getWorkitems(aCommit.message),
+            family: 'GitLab',
             originalMessage: aCommit
           };
+          var repoInfo = getRepoInfo(commit.html_url);
+          commit.repoHref = getRepoHref(repoInfo);
+          commit.repo = repoInfo.repoOwner + '/' + repoInfo.repoName;
+          commit.branchHref = getBranchHref(commit.repoHref, branch);
           return commit;
         });
 

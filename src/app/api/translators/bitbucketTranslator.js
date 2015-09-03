@@ -18,6 +18,10 @@ var _middlewareBitbucketCommitMalformedError = require('../../middleware/bitbuck
 
 var _middlewareBitbucketCommitMalformedError2 = _interopRequireDefault(_middlewareBitbucketCommitMalformedError);
 
+var _v1Mentions = require('./v1Mentions');
+
+var _v1Mentions2 = _interopRequireDefault(_v1Mentions);
+
 var bitbucketTranslator = {};
 
 var hasCorrectHeaders = function hasCorrectHeaders(headers) {
@@ -26,6 +30,34 @@ var hasCorrectHeaders = function hasCorrectHeaders(headers) {
 
 bitbucketTranslator.canTranslate = function (request) {
   return hasCorrectHeaders(request.headers);
+};
+
+// https://serverUrl/repoOwner/repoName
+var getRepoHref = function getRepoHref(repoInfo) {
+  return repoInfo.serverUrl + '/' + repoInfo.repoOwner + '/' + repoInfo.repoName;
+};
+
+// http://serverUrl/repoOwner/reponame/tree/branchName
+var getBranchHref = function getBranchHref(repoHref, branch) {
+  return repoHref + '/tree/' + branch;
+};
+
+var getRepoInfo = function getRepoInfo(commitUrl) {
+
+  var repoArray = undefined;
+
+  repoArray = commitUrl.split('/commits')[0].split('/');
+
+  r = {};
+  r.repoName = repoArray.pop();
+  r.repoOwner = repoArray.pop();
+  r.serverUrl = repoArray.pop();
+
+  if (repoArray.pop() === '') {
+    r.serverUrl = repoArray.pop() + '//' + r.serverUrl;
+  }
+
+  return r;
 };
 
 bitbucketTranslator.translatePush = function (pushEvent, instanceId, digestId, inboxId) {
@@ -62,8 +94,14 @@ bitbucketTranslator.translatePush = function (pushEvent, instanceId, digestId, i
           html_url: aCommit.links.html.href,
           repository: repository,
           branch: branch,
+          mentions: _v1Mentions2['default'].getWorkitems(aCommit.message),
+          family: 'Bitbucket',
           originalMessage: aCommit
         };
+        var repoInfo = getRepoInfo(commit.html_url);
+        commit.repoHref = getRepoHref(repoInfo);
+        commit.repo = repoInfo.repoOwner + '/' + repoInfo.repoName;
+        commit.branchHref = getBranchHref(commit.repoHref, branch);
         return commit;
       });
 

@@ -1,12 +1,38 @@
 import _ from 'underscore';
 import uuid from 'uuid-v4';
 import BitbucketCommitMalformedError from '../../middleware/bitbucketCommitMalformedError';
+import v1Mentions from './v1Mentions';
 
 let bitbucketTranslator = {};
 
 let hasCorrectHeaders = headers => headers.hasOwnProperty('x-event-key') && headers['x-event-key'] === 'repo:push';
 
 bitbucketTranslator.canTranslate = request => hasCorrectHeaders(request.headers);
+
+// https://serverUrl/repoOwner/repoName
+let getRepoHref = (repoInfo) =>
+  repoInfo.serverUrl + '/' + repoInfo.repoOwner + '/' + repoInfo.repoName;
+
+// http://serverUrl/repoOwner/reponame/tree/branchName
+let getBranchHref = (repoHref, branch) => repoHref + '/tree/' + branch;
+
+let getRepoInfo = (commitUrl) => {
+
+  let repoArray;
+
+  repoArray = commitUrl.split('/commits')[0].split('/');
+
+  r = {};
+  r.repoName = repoArray.pop();
+  r.repoOwner = repoArray.pop();
+  r.serverUrl = repoArray.pop();
+
+  if (repoArray.pop() === '') {
+    r.serverUrl = repoArray.pop() + '//' + r.serverUrl;
+  }
+
+  return r;
+};
 
 bitbucketTranslator.translatePush = (pushEvent, instanceId, digestId, inboxId) => {
   try {
@@ -41,8 +67,14 @@ bitbucketTranslator.translatePush = (pushEvent, instanceId, digestId, inboxId) =
         html_url: aCommit.links.html.href,
         repository,
         branch,
+        mentions: v1Mentions.getWorkitems(aCommit.message),
+        family: 'Bitbucket',
         originalMessage: aCommit
       };
+      let repoInfo = getRepoInfo(commit.html_url);
+      commit.repoHref = getRepoHref(repoInfo);
+      commit.repo = repoInfo.repoOwner + '/' + repoInfo.repoName;
+      commit.branchHref = getBranchHref(commit.repoHref, branch);
       return commit;
 
     });
@@ -53,4 +85,5 @@ bitbucketTranslator.translatePush = (pushEvent, instanceId, digestId, inboxId) =
   }
 };
 
-export default bitbucketTranslator;
+export
+default bitbucketTranslator;
