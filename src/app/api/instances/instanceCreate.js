@@ -1,6 +1,5 @@
 (function() {
-  var instanceFormatAsHal = require('./instanceFormatAsHal'),
-    setTimeout = require('../helpers/setTimeout'),
+  var instanceFormatAsHal = require('./instanceFormatAsHal'),    
     config = require('../../config'),
     uuid = require('uuid-v4'),
     mongoose = require('mongoose'),
@@ -15,12 +14,8 @@
       // TODO: find a general way of handling errors like we used to have with
       // the event store helper
       if (err) return res.send(500, err);
-
       var hypermedia = instanceFormatAsHal(req.href, instance);
-      setTimeout(function() {
-        res.hal(hypermedia, 201);
-      }, config.controllerResponseDelay);
+      res.hal(hypermedia, 201);
     });
-
   };
 }());

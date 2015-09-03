@@ -1,8 +1,7 @@
 (function() {
   var inboxAdded = require('./inboxAdded'),
     inboxFormatAsHal = require('./inboxFormatAsHal'),
-    //sanitizeAndValidate = require('../sanitizeAndValidate'),
-    setTimeout = require('../helpers/setTimeout'),
+    //sanitizeAndValidate = require('../sanitizeAndValidate'),    
     config = require('../../config'),
     mongoose = require('mongoose'),
     uuid = require('uuid-v4'),
@@ -24,12 +23,8 @@
     // the event store helper
     inbox.save(function(err, i) {
       if (err) return res.send(500, err);
-
       var hypermedia = inboxFormatAsHal(req.href, i.instanceId, i);
-      setTimeout(function() {
-        res.hal(hypermedia, 201);
-      }, config.controllerResponseDelay);
-
+      res.hal(hypermedia, 201);
     });
   };
 }());

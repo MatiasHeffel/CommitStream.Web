@@ -1,8 +1,7 @@
 (function() {
   var digestAdded = require('./digestAdded'),
     digestFormatAsHal = require('./digestFormatAsHal'),
-    sanitizeAndValidate = require('../sanitizeAndValidate'),
-    setTimeout = require('../helpers/setTimeout'),
+    sanitizeAndValidate = require('../sanitizeAndValidate'),    
     config = require('../../config'),
     mongoose = require('mongoose'),
     uuid = require('uuid-v4'),
@@ -20,11 +19,8 @@
       // TODO: find a general way of handling errors like we used to have with
       // the event store helper
       if (err) return res.send(500, err);
-
       var hypermedia = digestFormatAsHal(req.href, d.instanceId, d);
-      setTimeout(function() {
-        res.hal(hypermedia, 201);
-      }, config.controllerResponseDelay);
+      res.hal(hypermedia, 201);
     });
   };
 }());
