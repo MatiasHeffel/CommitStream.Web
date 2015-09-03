@@ -1,7 +1,8 @@
 ((gitLabTranslator) => {
   let _ = require('underscore'),
     uuid = require('uuid-v4'),
-    GitLabCommitMalformedError = require('../../middleware/gitLabCommitMalformedError');
+    GitLabCommitMalformedError = require('../../middleware/gitLabCommitMalformedError'),
+    v1Mentions = require('./v1Mentions');
 
   let hasCorrectHeaders = (headers) => {
     return headers.hasOwnProperty('x-gitlab-event') && headers['x-gitlab-event'] === 'Push Hook';
@@ -15,6 +16,28 @@
     }
     return false;
   }
+
+  let getRepoInfo = (commitUrl) => {
+    let repoArray;
+    repoArray = commitUrl.split('/commit')[0].split('/');
+    let r = {};
+    r.repoName = repoArray.pop();
+    r.repoOwner = repoArray.pop();
+    r.serverUrl = repoArray.pop();
+
+    if (repoArray.pop() === '') {
+      r.serverUrl = repoArray.pop() + '//' + r.serverUrl;
+    }
+
+    return r;
+  };
+
+  // http://serverUrl/repoOwner/reponame/tree/branchName
+  let getBranchHref = (repoHref, branch) => repoHref + '/tree/' + branch;
+
+  // https://serverUrl/repoOwner/repoName
+  let getRepoHref = (repoInfo) =>
+    repoInfo.serverUrl + '/' + repoInfo.repoOwner + '/' + repoInfo.repoName;
 
   gitLabTranslator.translatePush = (pushEvent, instanceId, digestId, inboxId) => {
     try {
@@ -50,8 +73,14 @@
           html_url: aCommit.url,
           repository: repository,
           branch: branch,
+          mentions: v1Mentions.getWorkitems(aCommit.message),
+          family: 'GitLab',
           originalMessage: aCommit
         };
+        let repoInfo = getRepoInfo(commit.html_url);
+        commit.repoHref = getRepoHref(repoInfo);
+        commit.repo = repoInfo.repoOwner + '/' + repoInfo.repoName;
+        commit.branchHref = getBranchHref(commit.repoHref, branch);
         return commit;
       });
 
