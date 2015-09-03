@@ -27,6 +27,10 @@
 
       let events = _.map(pushEvent.commits, function(aCommit) {
         let commit = {
+          instanceId,
+          digestId,
+          inboxId,
+          eventType: 'GitLabCommitReceived',
           sha: aCommit.id,
           commit: {
             author: aCommit.author,
@@ -48,16 +52,7 @@
           branch: branch,
           originalMessage: aCommit
         };
-        return {
-          eventId: uuid(),
-          eventType: 'GitLabCommitReceived',
-          data: commit,
-          metadata: {
-            instanceId: instanceId,
-            digestId: digestId,
-            inboxId: inboxId
-          }
-        };
+        return commit;
       });
 
       return events;

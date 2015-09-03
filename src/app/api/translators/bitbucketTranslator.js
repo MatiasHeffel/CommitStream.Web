@@ -44,6 +44,10 @@ bitbucketTranslator.translatePush = function (pushEvent, instanceId, digestId, i
       var commits = pushEvent.push.changes[0].commits.reverse();
       var events = _underscore2['default'].map(commits, function (aCommit) {
         var commit = {
+          instanceId: instanceId,
+          digestId: digestId,
+          inboxId: inboxId,
+          eventType: 'BitbucketCommitReceived',
           sha: aCommit.hash,
           commit: {
             author: aCommit.author.user.username,
@@ -60,16 +64,7 @@ bitbucketTranslator.translatePush = function (pushEvent, instanceId, digestId, i
           branch: branch,
           originalMessage: aCommit
         };
-        return {
-          eventId: (0, _uuidV42['default'])(),
-          eventType: 'BitbucketCommitReceived',
-          data: commit,
-          metadata: {
-            instanceId: instanceId,
-            digestId: digestId,
-            inboxId: inboxId
-          }
-        };
+        return commit;
       });
 
       return {

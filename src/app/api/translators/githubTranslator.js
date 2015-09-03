@@ -1,4 +1,5 @@
-﻿(function(githubTranslator) {
+﻿
+(function(githubTranslator) {
   var _ = require('underscore'),
     util = require('util'),
     uuid = require('uuid-v4'),
@@ -23,6 +24,10 @@
 
       var events = _.map(pushEvent.commits, function(aCommit) {
         var commit = {
+          instanceId: instanceId,
+          digestId: digestId,
+          inboxId: inboxId,
+          eventType: 'GitHubCommitReceived',
           sha: aCommit.id,
           commit: {
             author: aCommit.author,
@@ -38,17 +43,9 @@
           branch: branch,
           originalMessage: aCommit
         };
-        return {
-          eventId: uuid(),
-          eventType: 'GitHubCommitReceived',
-          data: commit,
-          metadata: {
-            instanceId: instanceId,
-            digestId: digestId,
-            inboxId: inboxId
-          }
-        };
+        return commit;
       });
+
       return events;
     } catch (ex) {
       var otherEx = new githubTranslator.GitHubCommitMalformedError(ex, pushEvent);
